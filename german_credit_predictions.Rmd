@@ -63,6 +63,21 @@ skim(df_credit_01)
 DataExplorer::plot_missing(df_credit_01)
 ```
 
+
+```{r}
+loan_type <- ggplot(df_credit, aes( fct_infreq(purpose) ) ) + 
+  geom_bar( fill = "lightblue") +
+  geom_text(stat = "count", aes(label = stat(count), vjust = -0.5)) + 
+  scale_fill_discrete() +
+  labs(y = "Count", x = "Type of loan") + 
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+ggsave(filename = "./images/loan_type.png",plot = loan_type)
+
+```
+
+
+
 split data
 ```{r}
 set.seed(1)
