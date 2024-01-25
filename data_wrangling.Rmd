@@ -1,0 +1,99 @@
+# ---- Clean credit German data ----
+
+
+load packages
+```{r}
+pacman::p_load(tidyverse, janitor, skimr)
+```
+
+```{r}
+df <- read.csv("./data/GermanCredit_dirty.csv")
+```
+
+Description
+```{r}
+skim(df)
+```
+
+function to obtain level for variables
+```{r}
+levels_var <- function(var){
+  df |> 
+  select(where(is.character)) |> 
+  mutate(var = factor(!!sym(var))) |> 
+  pull(var) |> 
+  levels()
+}
+
+levels_var(var = "savings")
+```
+
+
+data manipulations
+```{r}
+data <- df |> 
+  clean_names() |> 
+  mutate(across(where(is.character), as.factor)) |> 
+  mutate(status = fct_recode(status,
+                             "<0" ="... < 100 DM" ,
+                             ">=200" = "... >= 200 DM / salary for at least 1 year",
+                             "0<=X<200" = "0 <= ... < 200 DM",
+                             "no checking" = "no checking account" ),
+         credit_history = fct_recode(credit_history,
+                                     "all paid" = "critical account/other credits existing",
+                                     "critical/other existing credit" = "critical account/other credits existing", 
+                                     "delayed previously" = "delay in paying off in the past",
+                                     "existing paid" = "existing credits paid back duly till now",
+                                     "no credits/all paid" = "no credits taken/all credits paid back duly" ),
+         purpose = fct_recode(purpose,
+                              "new car" = "car (new)",
+                              "used car" = "car (used)",
+                              "other" = "others",
+                              "radio/tv" = "radio/television"), 
+         savings = fct_recode(savings, 
+                              "<100" = "... < 100 DM",
+                              ">=1000" = "... >= 1000 DM",
+                              "100<=X<500" = "100 <= ... < 500 DM",
+                              "500<=X<1000" = "500 <= ... < 1000 DM",
+                              "no known savings" = "unknown/no savings account" ),
+         employment_duration = fct_recode(employment_duration,
+                                          "<1" = "... < 1 year",
+                                          ">=7" = "... >= 7 years",
+                                          "1<=X<4" = "1 <= ... < 4 years",
+                                          "4<=X<7" = "4 <= ... < 7 years" ),
+         property = fct_recode(property,
+                               "non known property" = "unknown/no property",
+                               "car" = "car or other"),
+         telephone = fct_recode(telephone, 
+                                "none" = "no"),
+         credit_risk  = factor(ifelse(credit_risk == 1, "good", "bad")) ) |> 
+  rename(checking_status = status,
+         credit_amount = amount,
+         employment_duration_years = employment_duration,
+         residence_since = present_residence,
+         installment_commitment_year = installment_rate,
+         other_payment_plans = other_installment_plans,
+         existing_credits = number_credits,
+         num_dependents = people_liable, 
+         own_telephone =  telephone,
+         credit_class = credit_risk) |> 
+  select(credit_class, everything())
+
+```
+
+
+```{r}
+head(data)
+```
+
+
+output data
+```{r}
+# keep format of variables
+# write_rds(data, "./data/german_credit_clean.csv")
+
+# Read csv files
+# write.csv(data, "./data/german_credit_clean.csv")
+```
+
+
